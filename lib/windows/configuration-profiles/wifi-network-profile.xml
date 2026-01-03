@@ -1,4 +1,4 @@
-<Add>
+<Replace>
   <Item>
     <Meta>
       <Format xmlns="syncml:metinf">chr</Format>
@@ -34,4 +34,4 @@
 </WLANProfile>]]>
     </Data>
   </Item>
-</Add>
+</Replace>

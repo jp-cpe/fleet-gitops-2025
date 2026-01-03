@@ -18,6 +18,8 @@ queries:
 agent_options:
   path: ../lib/agent-options.yml
 controls:
+  os_settings:
+    - path: ../lib/windows/configuration-profiles/wifi-network-profile.xml
   scripts:
     - path: ../lib/macos/scripts/remove-zoom-artifacts.script.sh
     - path: ../lib/macos/scripts/set-timezone.script.sh
