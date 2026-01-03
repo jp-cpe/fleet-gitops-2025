@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+<SyncBody>
+  <Add>
+    <CmdID>1</CmdID>
+    <Item>
+      <Meta>
+        <Format xmlns="syncml:metinf">chr</Format>
+      </Meta>
+      <Target>
+        <LocURI>./Device/Vendor/MSFT/WLANProfile/WlanXml</LocURI>
+      </Target>
+      <Data>
+        <![CDATA[<?xml version="1.0"?>
+<WLANProfile xmlns="http://www.microsoft.com/networking/WLAN/profile/v1">
+  <name>YOUR_NETWORK_NAME</name>
+  <SSIDConfig>
+    <SSID>
+      <name>YOUR_NETWORK_NAME</name>
+    </SSID>
+  </SSIDConfig>
+  <connectionType>ESS</connectionType>
+  <connectionMode>auto</connectionMode>
+  <MSM>
+    <security>
+      <authEncryption>
+        <authentication>WPA2PSK</authentication>
+        <encryption>AES</encryption>
+        <useOneX>false</useOneX>
+      </authEncryption>
+      <sharedKey>
+        <keyType>passPhrase</keyType>
+        <protected>false</protected>
+        <keyMaterial>YOUR_WIFI_PASSWORD</keyMaterial>
+      </sharedKey>
+    </security>
+  </MSM>
+</WLANProfile>]]>
+      </Data>
+    </Item>
+  </Add>
+</SyncBody>
