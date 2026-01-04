@@ -20,6 +20,8 @@ agent_options:
 controls:
   os_settings:
     - path: ../lib/windows/configuration-profiles/wifi-network-profile.xml
+    - path: ../lib/windows/configuration-profiles/test.json
+    - path: ../lib/macos/configuration-profiles/passcode-settings-ddm.json
   scripts:
     - path: ../lib/macos/scripts/remove-zoom-artifacts.script.sh
     - path: ../lib/macos/scripts/set-timezone.script.sh
