@@ -1,8 +1,0 @@
-{
-    "Type": "com.apple.configuration.diskmanagement.settings",
-    "Payload": {
-        "Restrictions": {
-            "ExternalStorage": "Disallowed"
-        }
-    }
-}
