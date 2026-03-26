@@ -1,0 +1,9 @@
+{
+    "Type": "com.apple.configuration.diskmanagement.settings",
+    "Identifier": "d1a2b3c4-e5f6-7890-abcd-ef1234567890",
+    "Payload": {
+        "Restrictions": {
+            "ExternalStorage": "Disallowed"
+        }
+    }
+}
