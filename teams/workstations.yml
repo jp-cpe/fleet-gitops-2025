@@ -5,7 +5,6 @@ agent_options:
 controls:
   macos_settings:
     custom_settings:
-      - path: ../lib/macos/declaration-profiles/passcode-settings-ddm.json
       - path: ../lib/macos/declaration-profiles/disk-management-settings-ddm.json
 software:
 team_settings:
