@@ -1,9 +1,0 @@
-{
-    "Type": "com.apple.configuration.passcode.settings",
-    "Payload": {
-        "MaximumFailedAttempts": 5,
-        "MaximumInactivityInMinutes": 5,
-        "MinimumLength": 12,
-        "MinimumComplexCharacters": 1
-    }
-}
