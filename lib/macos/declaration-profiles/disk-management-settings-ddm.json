@@ -1,0 +1,12 @@
+{
+    "Type": "com.apple.configuration.diskmanagement.settings",
+    "Identifier": "b8f5e132-c4a8-4e72-9e47-3d7a1f6c9b2e",
+    "Payload": {
+        "ExternalStorage": {
+            "Allow": false
+        },
+        "NetworkStorage": {
+            "Allow": false
+        }
+    }
+}
