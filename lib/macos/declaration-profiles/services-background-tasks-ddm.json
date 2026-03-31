@@ -1,6 +1,6 @@
 {
     "Type": "com.apple.configuration.services.background-tasks",
-    "Identifier": "EB13EE2B-5D63-4EBA-810F-5B81D07F5017",
+    "Identifier": "EB13EF2B-5D63-4EBA-810F-5B81D07F5017",
     "Payload": {
         "TaskType": "com.example.bgtask",
         "TaskDescription": "Test script",
