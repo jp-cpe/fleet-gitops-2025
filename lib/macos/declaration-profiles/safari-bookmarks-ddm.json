@@ -1,0 +1,12 @@
+{
+    "Type": "com.apple.configuration.safari.bookmarks",
+    "Identifier": "a3b1c8d4-5e6f-4a2b-9c8d-1e2f3a4b5c6d",
+    "Payload": {
+        "Bookmarks": [
+            {
+                "Title": "Fleet",
+                "URL": "https://fleetdm.com"
+            }
+        ]
+    }
+}
