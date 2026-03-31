@@ -7,7 +7,7 @@ controls:
     custom_settings:
       - path: ../lib/macos/declaration-profiles/passcode-settings-ddm.json
       - path: ../lib/macos/declaration-profiles/disk-management-settings-ddm.json
-      - path: ../lib/macos/declaration-profiles/safari-bookmarks-ddm.json
+      - path: ../lib/macos/configuration-profiles/safari-bookmarks.mobileconfig
 software:
 team_settings:
   secrets:

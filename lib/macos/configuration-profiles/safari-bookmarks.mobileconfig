@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <key>PayloadContent</key>
+    <array>
+        <dict>
+            <key>PayloadType</key>
+            <string>com.apple.ManagedClient.preferences</string>
+            <key>PayloadVersion</key>
+            <integer>1</integer>
+            <key>PayloadIdentifier</key>
+            <string>com.fleetdm.safari.bookmarks</string>
+            <key>PayloadUUID</key>
+            <string>a3b1c8d4-5e6f-4a2b-9c8d-1e2f3a4b5c6d</string>
+            <key>PayloadDisplayName</key>
+            <string>Safari Managed Bookmarks</string>
+            <key>PayloadOrganization</key>
+            <string>Fleet</string>
+            <key>PayloadEnabled</key>
+            <true/>
+            <key>PayloadContent</key>
+            <dict>
+                <key>com.apple.Safari</key>
+                <dict>
+                    <key>Forced</key>
+                    <array>
+                        <dict>
+                            <key>mcx_preference_settings</key>
+                            <dict>
+                                <key>ManagedBookmarks</key>
+                                <array>
+                                    <dict>
+                                        <key>Title</key>
+                                        <string>Fleet</string>
+                                        <key>URL</key>
+                                        <string>https://fleetdm.com</string>
+                                    </dict>
+                                </array>
+                            </dict>
+                        </dict>
+                    </array>
+                </dict>
+            </dict>
+        </dict>
+    </array>
+    <key>PayloadDisplayName</key>
+    <string>Safari Bookmarks</string>
+    <key>PayloadIdentifier</key>
+    <string>com.fleetdm.safari.bookmarks.profile</string>
+    <key>PayloadType</key>
+    <string>Configuration</string>
+    <key>PayloadUUID</key>
+    <string>b4c2d9e5-6f7a-4b3c-8d9e-2f3a5b6c7d8e</string>
+    <key>PayloadVersion</key>
+    <integer>1</integer>
+    <key>PayloadOrganization</key>
+    <string>Fleet</string>
+</dict>
+</plist>
