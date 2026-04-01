@@ -1,0 +1,420 @@
+- name: Axios attack - file system artifacts
+  description: >
+    Checks for RAT payloads, launchers, and temp files dropped by the compromised axios npm
+    package (versions 1.14.1 and 0.30.4) via the plain-crypto-js dropper. Covers macOS
+    com.apple.act.mond, Windows wt.exe/VBS/PS1 payloads, Linux ld.py, and cross-platform
+    staging files. Reference: https://github.com/axios/axios/issues/10611
+  query: |
+    SELECT
+      'file_artifact' AS ioc_category,
+      'rat_payload' AS ioc_type,
+      f.path AS indicator,
+      CASE
+        WHEN f.path LIKE '%com.apple.act.mond' THEN 'macOS RAT binary (Mach-O universal, self-signs via codesign)'
+        WHEN f.path LIKE '%ProgramData\wt.exe' THEN 'Windows RAT — renamed powershell.exe copy'
+        WHEN f.path LIKE '%6202033.vbs' THEN 'Windows VBScript launcher (may self-delete)'
+        WHEN f.path LIKE '%6202033.ps1' THEN 'Windows PowerShell payload (may self-delete)'
+        WHEN f.path LIKE '%stage2.ps1' THEN 'Windows Stage 2 PowerShell RAT (Wiz: 617b67a8...)'
+        WHEN f.path LIKE '%/tmp/ld.py' THEN 'Linux Python RAT payload'
+        WHEN f.path LIKE '%/6202033' THEN 'Cross-platform temp staging file'
+      END AS detail,
+      CAST(f.size AS TEXT) || ' bytes, mtime=' || datetime(f.mtime, 'unixepoch') AS host_path_or_value
+    FROM file f
+    WHERE f.path IN (
+      '/Library/Caches/com.apple.act.mond',
+      '/tmp/ld.py',
+      '/tmp/6202033',
+      '/private/tmp/6202033'
+    )
+    UNION ALL
+    SELECT
+      'file_artifact' AS ioc_category,
+      'rat_payload' AS ioc_type,
+      f.path AS indicator,
+      CASE
+        WHEN f.path LIKE '%wt.exe' THEN 'Windows RAT — renamed powershell.exe copy'
+        WHEN f.path LIKE '%6202033.vbs' THEN 'Windows VBScript launcher (may self-delete)'
+        WHEN f.path LIKE '%6202033.ps1' THEN 'Windows PowerShell payload (may self-delete)'
+        WHEN f.path LIKE '%stage2.ps1' THEN 'Windows Stage 2 PowerShell RAT'
+        WHEN f.path LIKE '%6202033' THEN 'Cross-platform temp staging file'
+      END AS detail,
+      CAST(f.size AS TEXT) || ' bytes, mtime=' || datetime(f.mtime, 'unixepoch') AS host_path_or_value
+    FROM file f
+    WHERE f.path IN (
+      'C:\ProgramData\wt.exe',
+      'C:\Windows\Temp\6202033.vbs',
+      'C:\Windows\Temp\6202033.ps1',
+      'C:\Windows\Temp\stage2.ps1',
+      'C:\Windows\Temp\6202033'
+    )
+    UNION ALL
+    SELECT
+      'file_artifact' AS ioc_category,
+      'rat_payload' AS ioc_type,
+      f.path AS indicator,
+      CASE
+        WHEN f.path LIKE '%6202033.vbs' THEN 'Windows VBScript launcher (per-user temp)'
+        WHEN f.path LIKE '%6202033.ps1' THEN 'Windows PowerShell payload (per-user temp)'
+        WHEN f.path LIKE '%stage2.ps1' THEN 'Windows Stage 2 PowerShell RAT (per-user temp)'
+        WHEN f.path LIKE '%6202033' THEN 'Cross-platform temp staging file (per-user temp)'
+      END AS detail,
+      CAST(f.size AS TEXT) || ' bytes, mtime=' || datetime(f.mtime, 'unixepoch') AS host_path_or_value
+    FROM users u
+    CROSS JOIN file f
+      ON f.path IN (
+        u.directory || '\AppData\Local\Temp\6202033.vbs',
+        u.directory || '\AppData\Local\Temp\6202033.ps1',
+        u.directory || '\AppData\Local\Temp\stage2.ps1',
+        u.directory || '\AppData\Local\Temp\6202033'
+      );
+  platform: darwin,linux,windows
+  interval: 3600
+  observer_can_run: false
+  automations_enabled: true
+
+- name: Axios attack - active C2 connections
+  description: >
+    Detects active network connections to the known C2 server used by the axios RAT.
+    C2 IP: 142.11.206.73 | C2 Domain: sfrclak.com | Port: 8000.
+    Reference: https://github.com/axios/axios/issues/10611
+  query: |
+    SELECT
+      'network' AS ioc_category,
+      'active_c2_conn' AS ioc_type,
+      pos.remote_address || ':' || pos.remote_port AS indicator,
+      'ACTIVE connection to Axios C2 — PID ' || pos.pid || ' (' || p.name || ')' AS detail,
+      p.path AS host_path_or_value
+    FROM process_open_sockets pos
+    JOIN processes p ON p.pid = pos.pid
+    WHERE pos.remote_address = '142.11.206.73'
+      OR (pos.remote_port = '8000' AND pos.remote_address != '127.0.0.1' AND pos.remote_address != '::1');
+  platform: darwin,linux,windows
+  interval: 900
+  observer_can_run: false
+  automations_enabled: true
+
+- name: Axios attack - DNS cache check
+  description: >
+    Looks for C2 domain resolution in the Windows DNS client cache. Checks for sfrclak.com
+    and packages.npm.org (spoofed registry domain). Windows only.
+    Reference: https://github.com/axios/axios/issues/10611
+  query: |
+    SELECT
+      'network' AS ioc_category,
+      'dns_cache_hit' AS ioc_type,
+      name AS indicator,
+      'C2 domain found in DNS cache — resolved to ' || COALESCE(data, 'N/A') AS detail,
+      type AS host_path_or_value
+    FROM dns_cache
+    WHERE name LIKE '%sfrclak.com%'
+      OR name LIKE '%packages.npm.org%';
+  platform: windows
+  interval: 3600
+  observer_can_run: false
+  automations_enabled: true
+
+- name: Axios attack - hosts file poisoning
+  description: >
+    Checks /etc/hosts for entries matching the axios C2 infrastructure. Some variants modify
+    the hosts file for C2 resolution.
+    Reference: https://github.com/axios/axios/issues/10611
+  query: |
+    SELECT
+      'network' AS ioc_category,
+      'hosts_file_entry' AS ioc_type,
+      address || ' -> ' || hostnames AS indicator,
+      'Suspicious hosts entry matching C2 infrastructure' AS detail,
+      address AS host_path_or_value
+    FROM etc_hosts
+    WHERE hostnames LIKE '%sfrclak%'
+      OR hostnames LIKE '%packages.npm.org%'
+      OR address = '142.11.206.73';
+  platform: darwin,linux,windows
+  interval: 3600
+  observer_can_run: false
+  automations_enabled: true
+
+- name: Axios attack - malicious npm packages
+  description: >
+    Searches for plain-crypto-js, @shadanai/openclaw, and @qqbrowser/openclaw-qbot in
+    node_modules directories. These are the dropper and related malicious packages from the
+    axios supply chain compromise. Adjust glob paths for your environment.
+    Reference: https://github.com/axios/axios/issues/10611
+  query: |
+    SELECT
+      'npm_package' AS ioc_category,
+      'malicious_dep' AS ioc_type,
+      f.path AS indicator,
+      'plain-crypto-js dropper package found in node_modules' AS detail,
+      CAST(f.size AS TEXT) || ' bytes, mtime=' || datetime(f.mtime, 'unixepoch') AS host_path_or_value
+    FROM file f
+    WHERE (
+      f.path LIKE '/Users/%/node_modules/plain-crypto-js/package.json'
+      OR f.path LIKE '/home/%/node_modules/plain-crypto-js/package.json'
+      OR f.path LIKE '/opt/%/node_modules/plain-crypto-js/package.json'
+      OR f.path LIKE '/var/%/node_modules/plain-crypto-js/package.json'
+      OR f.path LIKE 'C:\Users\%\node_modules\plain-crypto-js\package.json'
+      OR f.path LIKE 'C:\%\node_modules\plain-crypto-js\package.json'
+    )
+    UNION ALL
+    SELECT
+      'npm_package' AS ioc_category,
+      'malicious_dep' AS ioc_type,
+      f.path AS indicator,
+      '@shadanai/openclaw malicious package found in node_modules' AS detail,
+      CAST(f.size AS TEXT) || ' bytes, mtime=' || datetime(f.mtime, 'unixepoch') AS host_path_or_value
+    FROM file f
+    WHERE (
+      f.path LIKE '/Users/%/node_modules/@shadanai/openclaw/package.json'
+      OR f.path LIKE '/home/%/node_modules/@shadanai/openclaw/package.json'
+      OR f.path LIKE '/opt/%/node_modules/@shadanai/openclaw/package.json'
+      OR f.path LIKE 'C:\Users\%\node_modules\@shadanai\openclaw\package.json'
+    )
+    UNION ALL
+    SELECT
+      'npm_package' AS ioc_category,
+      'malicious_dep' AS ioc_type,
+      f.path AS indicator,
+      '@qqbrowser/openclaw-qbot malicious package found' AS detail,
+      CAST(f.size AS TEXT) || ' bytes, mtime=' || datetime(f.mtime, 'unixepoch') AS host_path_or_value
+    FROM file f
+    WHERE (
+      f.path LIKE '/Users/%/node_modules/@qqbrowser/openclaw-qbot/package.json'
+      OR f.path LIKE '/home/%/node_modules/@qqbrowser/openclaw-qbot/package.json'
+      OR f.path LIKE '/opt/%/node_modules/@qqbrowser/openclaw-qbot/package.json'
+      OR f.path LIKE 'C:\Users\%\node_modules\@qqbrowser\openclaw-qbot\package.json'
+    );
+  platform: darwin,linux,windows
+  interval: 86400
+  observer_can_run: false
+  automations_enabled: true
+
+- name: Axios attack - suspicious processes
+  description: >
+    Looks for RAT process names, suspicious command-line patterns, and codesign abuse
+    associated with the axios supply chain attack.
+    Reference: https://github.com/axios/axios/issues/10611
+  query: |
+    SELECT
+      'process' AS ioc_category,
+      'suspicious_proc' AS ioc_type,
+      p.name || ' (PID: ' || p.pid || ')' AS indicator,
+      CASE
+        WHEN p.path LIKE '%com.apple.act.mond' THEN 'macOS RAT process active'
+        WHEN p.name = 'wt.exe' THEN 'Windows RAT — renamed PowerShell copy running'
+        WHEN p.name = 'ld.py' OR p.cmdline LIKE '%/tmp/ld.py%'
+          THEN 'Linux RAT payload running'
+        WHEN p.cmdline LIKE '%stage2.ps1%' THEN 'Windows Stage 2 RAT script running'
+        WHEN p.cmdline LIKE '%6202033%' THEN 'Axios staging file referenced in process args'
+        WHEN p.cmdline LIKE '%sfrclak%' THEN 'C2 domain referenced in process args'
+        WHEN p.cmdline LIKE '%plain-crypto-js%' THEN 'Dropper package referenced in process args'
+        WHEN p.name = 'codesign' AND p.parent != 0
+          THEN 'codesign invoked (macOS RAT self-signs injected payloads)'
+      END AS detail,
+      p.path || ' | cmdline: ' || p.cmdline AS host_path_or_value
+    FROM processes p
+    WHERE p.path LIKE '%com.apple.act.mond'
+      OR p.name = 'wt.exe'
+      OR p.name = 'ld.py'
+      OR p.cmdline LIKE '%/tmp/ld.py%'
+      OR p.cmdline LIKE '%stage2.ps1%'
+      OR p.cmdline LIKE '%6202033%'
+      OR p.cmdline LIKE '%sfrclak%'
+      OR p.cmdline LIKE '%plain-crypto-js%'
+      OR (p.name = 'python' AND p.cmdline LIKE '%ld.py%')
+      OR (p.name = 'python3' AND p.cmdline LIKE '%ld.py%')
+      OR (p.name = 'codesign' AND p.cmdline LIKE '%/Library/Caches/%');
+  platform: darwin,linux,windows
+  interval: 3600
+  observer_can_run: false
+  automations_enabled: true
+
+- name: Axios attack - persistence (macOS and Linux)
+  description: >
+    Checks for RAT persistence via macOS LaunchDaemons/LaunchAgents and cron jobs on
+    macOS and Linux. The RAT may install persistence referencing act.mond, 6202033, or sfrclak.
+    Reference: https://github.com/axios/axios/issues/10611
+  query: |
+    SELECT
+      'persistence' AS ioc_category,
+      'launchd_plist' AS ioc_type,
+      f.path AS indicator,
+      'Suspicious launchd plist referencing Axios IOCs' AS detail,
+      CAST(f.size AS TEXT) || ' bytes' AS host_path_or_value
+    FROM file f
+    WHERE (
+      f.path LIKE '/Library/LaunchDaemons/%act.mond%'
+      OR f.path LIKE '/Library/LaunchAgents/%act.mond%'
+      OR f.path LIKE '/Users/%/Library/LaunchAgents/%act.mond%'
+      OR f.path LIKE '/Library/LaunchDaemons/%6202033%'
+      OR f.path LIKE '/Library/LaunchAgents/%6202033%'
+    )
+    UNION ALL
+    SELECT
+      'persistence' AS ioc_category,
+      'cron_job' AS ioc_type,
+      path AS indicator,
+      'Cron entry referencing Axios IOC artifacts' AS detail,
+      command AS host_path_or_value
+    FROM crontab
+    WHERE command LIKE '%ld.py%'
+      OR command LIKE '%6202033%'
+      OR command LIKE '%com.apple.act.mond%'
+      OR command LIKE '%sfrclak%';
+  platform: darwin,linux
+  interval: 3600
+  observer_can_run: false
+  automations_enabled: true
+
+- name: Axios attack - persistence (Windows)
+  description: >
+    Checks for RAT persistence via Windows Scheduled Tasks and Registry Run keys. The Stage 2
+    RAT establishes persistence via a "MicrosoftUpdate" Run key and batch re-downloader
+    (Wiz Research).
+    Reference: https://github.com/axios/axios/issues/10611
+  query: |
+    SELECT
+      'persistence' AS ioc_category,
+      'scheduled_task' AS ioc_type,
+      name AS indicator,
+      'Windows Scheduled Task referencing Axios IOCs' AS detail,
+      action AS host_path_or_value
+    FROM scheduled_tasks
+    WHERE action LIKE '%wt.exe%'
+      OR action LIKE '%6202033%'
+      OR action LIKE '%sfrclak%'
+      OR action LIKE '%plain-crypto-js%'
+    UNION ALL
+    SELECT
+      'persistence' AS ioc_category,
+      'registry_run_key' AS ioc_type,
+      path AS indicator,
+      CASE
+        WHEN path LIKE '%\MicrosoftUpdate' THEN 'EXACT MATCH: Axios Stage 2 persistence key "MicrosoftUpdate"'
+        ELSE 'Registry Run key referencing Axios IOCs'
+      END AS detail,
+      data AS host_path_or_value
+    FROM registry
+    WHERE (
+      path LIKE 'HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Run\%'
+      OR path LIKE 'HKEY_CURRENT_USER\SOFTWARE\Microsoft\Windows\CurrentVersion\Run\%'
+    )
+    AND (
+      path LIKE '%\MicrosoftUpdate'
+      OR data LIKE '%wt.exe%'
+      OR data LIKE '%6202033%'
+      OR data LIKE '%sfrclak%'
+      OR data LIKE '%stage2.ps1%'
+    );
+  platform: windows
+  interval: 3600
+  observer_can_run: false
+  automations_enabled: true
+
+- name: Axios attack - compromised axios in global npm
+  description: >
+    Checks for compromised axios versions in global npm installs and bundled Electron apps.
+    Node/npm local packages won't appear in the OS apps/programs tables, so this queries
+    the file system for global npm locations.
+    Reference: https://github.com/axios/axios/issues/10611
+  query: |
+    SELECT
+      'npm_package' AS ioc_category,
+      'global_npm_pkg' AS ioc_type,
+      f.path AS indicator,
+      'Potentially compromised axios found in global npm' AS detail,
+      datetime(f.mtime, 'unixepoch') AS host_path_or_value
+    FROM file f
+    WHERE (
+      f.path LIKE '%/lib/node_modules/axios/package.json'
+      OR f.path LIKE '%/npm/node_modules/axios/package.json'
+      OR f.path LIKE '%\node_modules\axios\package.json'
+    );
+  platform: darwin,linux,windows
+  interval: 86400
+  observer_can_run: false
+  automations_enabled: true
+
+- name: Axios attack - SHA256 hash validation
+  description: >
+    Definitive confirmation via SHA256 hash match on known RAT payloads (Wiz Research IOCs).
+    macOS com.apple.act.mond: 92ff0877..., Windows stage2.ps1: 617b67a8...,
+    Linux ld.py: fcb81618..., plain-crypto-js dropper: 58401c19...
+    Reference: https://github.com/axios/axios/issues/10611
+  query: |
+    SELECT
+      'hash_match' AS ioc_category,
+      'sha256_confirmed' AS ioc_type,
+      h.path AS indicator,
+      CASE h.sha256
+        WHEN '92ff08773995ebc8d55ec4b8e1a225d0d1e51efa4ef88b8849d0071230c9645a'
+          THEN 'CONFIRMED: macOS Stage 2 RAT (com.apple.act.mond)'
+        WHEN '617b67a8e1210e4fc87c92d1d1da45a2f311c08d26e89b12307cf583c900d101'
+          THEN 'CONFIRMED: Windows Stage 2 RAT (stage2.ps1)'
+        WHEN 'fcb81618bb15edfdedfb638b4c08a2af9cac9ecfa551af135a8402bf980375cf'
+          THEN 'CONFIRMED: Linux Stage 2 RAT (ld.py)'
+        WHEN '58401c195fe0a6204b42f5f90995ece5fab74ce7c69c67a24c61a057325af668'
+          THEN 'CONFIRMED: plain-crypto-js dropper package'
+        ELSE 'Hash mismatch — file exists but is NOT the known payload'
+      END AS detail,
+      h.sha256 AS host_path_or_value
+    FROM hash h
+    WHERE h.path IN (
+      '/Library/Caches/com.apple.act.mond',
+      '/tmp/ld.py'
+    )
+    UNION ALL
+    SELECT
+      'hash_match' AS ioc_category,
+      'sha256_confirmed' AS ioc_type,
+      h.path AS indicator,
+      CASE h.sha256
+        WHEN '617b67a8e1210e4fc87c92d1d1da45a2f311c08d26e89b12307cf583c900d101'
+          THEN 'CONFIRMED: Windows Stage 2 RAT (stage2.ps1)'
+        ELSE 'Hash mismatch — file exists but is NOT the known payload'
+      END AS detail,
+      h.sha256 AS host_path_or_value
+    FROM hash h
+    WHERE h.path IN (
+      'C:\ProgramData\wt.exe',
+      'C:\Windows\Temp\stage2.ps1'
+    )
+    UNION ALL
+    SELECT
+      'hash_match' AS ioc_category,
+      'sha256_confirmed' AS ioc_type,
+      h.path AS indicator,
+      CASE h.sha256
+        WHEN '617b67a8e1210e4fc87c92d1d1da45a2f311c08d26e89b12307cf583c900d101'
+          THEN 'CONFIRMED: Windows Stage 2 RAT (stage2.ps1)'
+        ELSE 'Hash mismatch — file exists but is NOT the known payload'
+      END AS detail,
+      h.sha256 AS host_path_or_value
+    FROM users u
+    CROSS JOIN hash h
+      ON h.path = u.directory || '\AppData\Local\Temp\stage2.ps1';
+  platform: darwin,linux,windows
+  interval: 86400
+  observer_can_run: false
+  automations_enabled: true
+
+- name: Axios attack - macOS codesign abuse
+  description: >
+    The macOS Mach-O RAT self-signs injected payloads via codesign (Wiz Research). This query
+    detects recently codesigned binaries in /Library/Caches with ad-hoc signatures or unknown
+    identities, which is characteristic of the axios RAT injection technique.
+    Reference: https://github.com/axios/axios/issues/10611
+  query: |
+    SELECT
+      'codesign_abuse' AS ioc_category,
+      'unsigned_or_adhoc' AS ioc_type,
+      sa.path AS indicator,
+      'Binary in /Library/Caches signed ad-hoc or with unknown identity — possible RAT injection' AS detail,
+      sa.authority AS host_path_or_value
+    FROM signature sa
+    WHERE sa.path LIKE '/Library/Caches/%'
+      AND (sa.authority = '' OR sa.authority LIKE '%ad hoc%' OR sa.identifier LIKE '%act.mond%');
+  platform: darwin
+  interval: 3600
+  observer_can_run: false
+  automations_enabled: true

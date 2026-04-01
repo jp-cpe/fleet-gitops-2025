@@ -2,6 +2,7 @@
 
 policies:
 queries:
+  - path: ./lib/all/queries/axios-attack-detection.yml
 agent_options:
 controls:
 org_settings:
