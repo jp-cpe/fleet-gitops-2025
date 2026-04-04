@@ -31,10 +31,14 @@ jobs:
           fetch-depth: 1
 
       - name: Install contour
+        env:
+          GH_TOKEN: ${{ secrets.CONTOUR_GITHUB_TOKEN }}
         run: |
-          CONTOUR_VERSION="0.1.6"
-          curl -sL "https://github.com/headmin/contour/releases/download/v${CONTOUR_VERSION}/contour-${CONTOUR_VERSION}-x86_64-unknown-linux-gnu.tar.gz" \
-            | sudo tar xz -C /usr/local/bin
+          gh release download v0.1.6 \
+            --repo headmin/contour \
+            --pattern 'contour-*-x86_64-unknown-linux-gnu.tar.gz' \
+            --dir /tmp
+          sudo tar xzf /tmp/contour-*-linux-gnu.tar.gz -C /usr/local/bin
           contour --version
 
       - name: Run Claude Code
