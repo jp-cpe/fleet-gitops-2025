@@ -1,0 +1,13 @@
+{
+    "Type": "com.apple.configuration.softwareupdate.enforcement.specific",
+    "Identifier": "a3b1c4d5-e6f7-4a89-b012-c3d4e5f6a7b8",
+    "Payload": {
+        "TargetOSVersion": "15.4",
+        "TargetLocalDateTime": "2026-04-07T08:00:00",
+        "DetailsURL": "https://support.apple.com/en-us/111976",
+        "Notifications": {
+            "ShowCountdown": true,
+            "ShowRestartCountdown": true
+        }
+    }
+}
