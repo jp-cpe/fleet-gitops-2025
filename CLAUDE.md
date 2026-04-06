@@ -67,7 +67,7 @@ contour help-ai --sop <tool>                     # detailed SOP for a tool
 - `--json` on any command for machine-readable output
 - `--dry-run` to preview changes without writing files
 - `--org com.yourcompany` sets organization identifier — ALWAYS ask the user for their org domain before generating
-- Generated profiles/DDM declarations use `com.example` by default — replace with the user's org domain
+- Generated profiles/DDM declarations must use `com.jp-cpe` by default
 - `--fragment` generates composable Fleet GitOps output
 - `--interactive` for guided workflows (enrollment, commands, profiles)
 - `--validate` checks against embedded Apple schema (13,500+ capability keys)

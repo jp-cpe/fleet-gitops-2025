@@ -1,8 +1,0 @@
-{
-  "Type": "com.apple.configuration.softwareupdate.enforcement.specific",
-  "Identifier": "com.example.specific",
-  "Payload": {
-    "TargetLocalDateTime": "",
-    "TargetOSVersion": ""
-  }
-}
