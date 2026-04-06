@@ -19,9 +19,7 @@ Use contour when the task involves:
 
 ### Before generating anything
 
-ALWAYS ask the user for their organization reverse-domain identifier (e.g., com.acme, com.fleetdm)
-BEFORE generating any profiles, DDM declarations, or enrollment configs.
-Pass it via `--org com.theirorg`. Without this, output defaults to `com.example` which is wrong.
+**STOP and ask the user** for their organization reverse-domain identifier (e.g., com.acme, com.fleetdm) BEFORE generating any profiles, DDM declarations, or enrollment configs. Do NOT proceed until the user provides it. Do NOT use `com.example` as a default. Pass the identifier via `--org com.theirorg`.
 
 ### How to use
 
