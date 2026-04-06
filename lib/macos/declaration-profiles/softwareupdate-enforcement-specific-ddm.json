@@ -1,0 +1,8 @@
+{
+    "Type": "com.apple.configuration.softwareupdate.enforcement.specific",
+    "Identifier": "a3b8f7e2-4c19-4d6a-b5e0-9f82c1d74a36",
+    "Payload": {
+        "TargetOSVersion": "15.4",
+        "TargetLocalDateTime": "2026-04-09T12:00:00"
+    }
+}
