@@ -72,6 +72,7 @@ contour help-ai --sop <tool>                     # detailed SOP for a tool
 - `--interactive` for guided workflows (enrollment, commands, profiles)
 - `--validate` checks against embedded Apple schema (13,500+ capability keys)
 - `--base64` for MDM command payloads ready for Fleet API
+- Generated profiles/DDM declarations must be validated by contour using the --validate flag
 
 ### Embedded data (always available, no network needed)
 
