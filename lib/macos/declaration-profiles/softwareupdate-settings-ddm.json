@@ -1,0 +1,12 @@
+{
+    "Type": "com.apple.configuration.softwareupdate.settings",
+    "Identifier": "com.jp-cpe.softwareupdate.settings",
+    "Payload": {
+        "Notifications": true,
+        "AutomaticActions": {
+            "Download": "Allowed",
+            "InstallOSUpdates": "Allowed",
+            "InstallSecurityUpdate": "Allowed"
+        }
+    }
+}
