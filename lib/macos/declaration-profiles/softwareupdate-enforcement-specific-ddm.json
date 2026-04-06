@@ -1,0 +1,13 @@
+{
+    "Type": "com.apple.configuration.softwareupdate.enforcement.specific",
+    "Identifier": "b3e2a7f1-8c44-4d6e-9a15-2f7b8e3d1c09",
+    "Payload": {
+        "TargetOSVersion": "15.4",
+        "TargetLocalDateTime": "2025-04-09T08:00:00",
+        "Notifications": {
+            "OneDay": true,
+            "FourHours": true,
+            "OneHour": true
+        }
+    }
+}
