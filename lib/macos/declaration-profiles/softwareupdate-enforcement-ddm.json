@@ -1,0 +1,8 @@
+{
+    "Type": "com.apple.configuration.softwareupdate.enforcement.specific",
+    "Identifier": "com.example.softwareupdate.enforcement.macos15.4",
+    "Payload": {
+        "TargetOSVersion": "15.4",
+        "TargetLocalDateTime": "2026-04-09T12:00:00"
+    }
+}
