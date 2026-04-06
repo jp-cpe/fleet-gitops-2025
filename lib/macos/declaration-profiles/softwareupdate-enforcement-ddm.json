@@ -1,0 +1,8 @@
+{
+    "Type": "com.apple.configuration.softwareupdate.enforcement.specific",
+    "Identifier": "com.jp-cpe.softwareupdate.enforcement.specific",
+    "Payload": {
+        "TargetOSVersion": "15.7.5",
+        "TargetLocalDateTime": "2026-04-09T12:00:00"
+    }
+}
