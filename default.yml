@@ -1,12 +1,10 @@
-# default.yml controls global settings and policies/reports that run on all hosts.
+# default.yml controls global settings and queries that run on all hosts.
 
 policies:
-reports:
-  - paths: ./platforms/all/reports/*.yml
+queries:
+  - paths: ./platforms/all/queries/*.yml
 agent_options:
 controls:
-labels:
-  - paths: ./labels/*.yml
 org_settings:
   server_settings:
     server_url: $FLEET_URL
