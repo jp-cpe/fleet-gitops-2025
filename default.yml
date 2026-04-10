@@ -6,6 +6,9 @@ queries:
   - path: ./platforms/all/queries/axios-attack-detection.yml
 agent_options:
 controls:
+labels:
+  - path: ./labels/macos.yml
+  - path: ./labels/macos-arm64.yml
 org_settings:
   server_settings:
     server_url: $FLEET_URL

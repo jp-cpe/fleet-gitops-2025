@@ -1,0 +1,3 @@
+name: macOS
+description: Apple hosts (darwin).
+query: SELECT 1 FROM system_info WHERE platform = 'darwin';

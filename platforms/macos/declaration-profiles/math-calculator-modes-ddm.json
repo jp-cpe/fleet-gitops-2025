@@ -1,0 +1,14 @@
+{
+  "Type": "com.apple.configuration.math.settings",
+  "Identifier": "A1F2E3D4-C5B6-4789-9ABC-DEF012345678",
+  "Payload": {
+    "Calculator": {
+      "ScientificMode": {
+        "Enabled": false
+      },
+      "ProgrammerMode": {
+        "Enabled": false
+      }
+    }
+  }
+}
