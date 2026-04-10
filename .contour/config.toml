@@ -1,0 +1,8 @@
+[organization]
+name = "jp-cpe"
+domain = "com.jpcpe"
+server_url = "https://fleet-1y77.onrender.com/"
+
+[defaults]
+platforms = ["macos"]
+deterministic_uuids = true

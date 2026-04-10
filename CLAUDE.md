@@ -82,3 +82,11 @@ contour help-ai --sop <tool>                     # detailed SOP for a tool
 - 14 compliance baselines (CIS, STIG, 800-53, CMMC)
 - 71 Setup Assistant skip keys with platform/version gating
 - 200+ third-party app schemas (1Password, Chrome, Slack, etc.)
+
+
+
+
+
+
+
+test

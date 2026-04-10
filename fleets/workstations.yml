@@ -1,0 +1,13 @@
+name: "💻 Workstations"
+policies:
+reports:
+agent_options:
+controls:
+  apple_settings:
+    configuration_profiles:
+      - paths: ../platforms/macos/declaration-profiles/*.json
+      - paths: ../platforms/macos/configuration-profiles/*.mobileconfig
+software:
+settings:
+  secrets:
+    - secret: "$FLEET_WORKSTATIONS_ENROLL_SECRET"
