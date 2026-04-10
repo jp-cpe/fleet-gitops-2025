@@ -2,7 +2,8 @@
 
 policies:
 queries:
-  - paths: ./platforms/all/queries/*.yml
+  # fleetctl 4.82 expects `- path:` for file includes; `paths:` globs are a 4.83+ feature.
+  - path: ./platforms/all/queries/axios-attack-detection.yml
 agent_options:
 controls:
 org_settings:
